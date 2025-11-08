@@ -16,6 +16,9 @@ function createApp (container) {
   app.use(helmet())
 
   // CORS
+  // Note: CORS origin is configurable via environment variable
+  // Set CORS_ORIGIN to specific domain(s) in production (e.g., https://your-domain.com)
+  // Default '*' is for development convenience only
   const corsEnabled = process.env.CORS_ENABLED !== 'false'
   if (corsEnabled) {
     const corsOrigin = process.env.CORS_ORIGIN || '*'
@@ -106,6 +109,8 @@ function createApp (container) {
   }
 
   // Swagger/OpenAPI documentation
+  // Note: OpenAPI spec is intentionally public for API documentation purposes
+  // This endpoint serves a static YAML file and does not require rate limiting
   try {
     const openApiPath = path.join(__dirname, '../../openapi.yaml')
     if (fs.existsSync(openApiPath)) {
