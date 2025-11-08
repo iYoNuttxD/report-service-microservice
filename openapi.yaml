@@ -19,7 +19,7 @@ info:
 servers:
   - url: http://localhost:3010/api/v1
     description: Development server
-  - url: https://report-service.example.com/api/v1
+  - url: https://clickdelivery-report-service.azurewebsites.net/
     description: Production server
 
 tags:
