@@ -12,14 +12,13 @@ env:
   REGISTRY: docker.io
   DOCKERHUB_NAMESPACE: iyonuttxd
   IMAGE_NAME: report-service
-  # Caminho de contexto do Docker (ajuste se necessário)
-  DOCKER_CONTEXT: .
-  # Plataformas alvo
+  BUILD_CONTEXT: .
   PLATFORMS: linux/amd64,linux/arm64
 
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
+
     permissions:
       contents: read
       packages: write
@@ -57,20 +56,20 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${{ env.DOCTORHUB_NAMESPACE || env.DOCKERHUB_NAMESPACE }}/${{ env.IMAGE_NAME }}
+          images: ${{ env.REGISTRY }}/${{ env.DOCKERHUB_NAMESPACE }}/${{ env.IMAGE_NAME }}
           tags: |
             type=raw,value=latest,enable={{is_default_branch}}
             type=ref,event=tag
             type=sha,format=long
           labels: |
-            org.opencontainers.image.title=report-service
+            org.opencontainers.image.title=${{ env.IMAGE_NAME }}
             org.opencontainers.image.source=${{ github.repository }}
             org.opencontainers.image.revision=${{ github.sha }}
 
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
-          context: ${{ env.DOCKER_CONTEXT }}
+          context: ${{ env.BUILD_CONTEXT }}
           platforms: ${{ env.PLATFORMS }}
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
