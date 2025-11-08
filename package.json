@@ -1,0 +1,56 @@
+{
+  "name": "report-service-microservice",
+  "version": "1.0.0",
+  "description": "Microservice for aggregating events/logs and generating consolidated reports and metrics",
+  "main": "src/main/server.js",
+  "scripts": {
+    "start": "node src/main/server.js",
+    "dev": "nodemon src/main/server.js",
+    "test": "jest",
+    "test:unit": "jest --testPathIgnorePatterns=/tests/integration/",
+    "test:integration": "jest tests/integration --runInBand",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "lint": "eslint src tests",
+    "lint:fix": "eslint src tests --fix"
+  },
+  "keywords": [
+    "reports",
+    "metrics",
+    "aggregation",
+    "microservice",
+    "nats",
+    "mongodb"
+  ],
+  "author": "iYoNuttxD",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "mongodb": "^6.3.0",
+    "nats": "^2.19.0",
+    "winston": "^3.11.0",
+    "prom-client": "^15.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "jwks-rsa": "^3.1.0",
+    "axios": "^1.6.2",
+    "dotenv": "^16.3.1",
+    "helmet": "^7.1.0",
+    "cors": "^2.8.5",
+    "express-rate-limit": "^7.1.5",
+    "swagger-ui-express": "^5.0.0",
+    "yaml": "^2.3.4"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "supertest": "^6.3.3",
+    "nodemon": "^3.0.2",
+    "eslint": "^8.55.0",
+    "eslint-config-standard": "^17.1.0",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^6.1.1"
+  }
+}

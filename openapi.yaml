@@ -1,0 +1,374 @@
+openapi: 3.0.0
+info:
+  title: Report Service API
+  version: 1.0.0
+  description: |
+    Microservice for aggregating events/logs and generating consolidated reports and metrics.
+    
+    ## Features
+    - Event aggregation with idempotency
+    - Report generation and querying
+    - Metrics aggregation
+    - JWT authentication
+    - OPA-based authorization
+  contact:
+    name: iYoNuttxD
+  license:
+    name: MIT
+
+servers:
+  - url: http://localhost:3010/api/v1
+    description: Development server
+  - url: https://report-service.example.com/api/v1
+    description: Production server
+
+tags:
+  - name: Reports
+    description: Report management and querying
+  - name: Metrics
+    description: Aggregated metrics
+  - name: Health
+    description: Service health and monitoring
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token for authentication
+
+  schemas:
+    Report:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Report unique identifier
+          example: "507f1f77bcf86cd799439011"
+        type:
+          type: string
+          description: Report type
+          enum: [orders, delivery, notifications, general]
+          example: "orders"
+        periodStart:
+          type: string
+          format: date-time
+          description: Period start date (ISO 8601)
+          example: "2023-11-08T00:00:00.000Z"
+        periodEnd:
+          type: string
+          format: date-time
+          description: Period end date (ISO 8601)
+          example: "2023-11-08T23:59:59.999Z"
+        generatedAt:
+          type: string
+          format: date-time
+          description: Report generation timestamp (ISO 8601)
+          example: "2023-11-08T15:30:00.000Z"
+        status:
+          type: string
+          description: Report status
+          enum: [generated, processing, failed]
+          example: "generated"
+        indicators:
+          type: object
+          description: Aggregated indicators/metrics
+          additionalProperties: true
+          example:
+            totalOrders: 150
+            ordersCreated: 120
+            totalOrderValue: 15000.50
+        metadata:
+          type: object
+          description: Additional metadata
+          additionalProperties: true
+          example:
+            createdBy: "aggregator"
+            version: "1.0"
+
+    ReportsResponse:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Report'
+        pagination:
+          $ref: '#/components/schemas/Pagination'
+
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+          description: Current page number
+          example: 1
+        limit:
+          type: integer
+          description: Items per page
+          example: 10
+        total:
+          type: integer
+          description: Total number of items
+          example: 150
+        pages:
+          type: integer
+          description: Total number of pages
+          example: 15
+
+    Metrics:
+      type: object
+      properties:
+        totalReports:
+          type: integer
+          description: Total number of reports
+          example: 150
+        reportsByType:
+          type: object
+          additionalProperties:
+            type: integer
+          example:
+            orders: 50
+            delivery: 45
+            notifications: 55
+        aggregatedIndicators:
+          type: object
+          additionalProperties: true
+          description: Aggregated indicators across all reports
+          example:
+            totalOrders: 5000
+            deliveriesCompleted: 4500
+            notificationsSent: 12000
+
+    Health:
+      type: object
+      properties:
+        status:
+          type: string
+          example: "healthy"
+        timestamp:
+          type: string
+          format: date-time
+          example: "2023-11-08T15:30:00.000Z"
+        services:
+          type: object
+          properties:
+            mongodb:
+              type: string
+              enum: [connected, disconnected]
+              example: "connected"
+            nats:
+              type: string
+              enum: [connected, disconnected]
+              example: "connected"
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+          example: "Internal server error"
+        message:
+          type: string
+          description: Detailed error message
+          example: "Database connection failed"
+
+paths:
+  /reports:
+    get:
+      summary: List and query reports
+      description: Retrieve reports with optional filtering and pagination
+      tags:
+        - Reports
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: type
+          in: query
+          description: Filter by report type
+          schema:
+            type: string
+            enum: [orders, delivery, notifications, general]
+          example: "orders"
+        - name: from
+          in: query
+          description: Filter reports from this date (ISO 8601)
+          schema:
+            type: string
+            format: date-time
+          example: "2023-11-01T00:00:00.000Z"
+        - name: to
+          in: query
+          description: Filter reports until this date (ISO 8601)
+          schema:
+            type: string
+            format: date-time
+          example: "2023-11-08T23:59:59.999Z"
+        - name: status
+          in: query
+          description: Filter by report status
+          schema:
+            type: string
+            enum: [generated, processing, failed]
+          example: "generated"
+        - name: page
+          in: query
+          description: Page number for pagination
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+          example: 1
+        - name: limit
+          in: query
+          description: Number of items per page
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 10
+          example: 10
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ReportsResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /reports/{id}:
+    get:
+      summary: Get report by ID
+      description: Retrieve a specific report by its unique identifier
+      tags:
+        - Reports
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Report unique identifier
+          schema:
+            type: string
+          example: "507f1f77bcf86cd799439011"
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Report'
+        '404':
+          description: Report not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /reports/metrics:
+    get:
+      summary: Get aggregated metrics
+      description: Retrieve aggregated metrics snapshot across reports
+      tags:
+        - Metrics
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: from
+          in: query
+          description: Aggregate metrics from this date (ISO 8601)
+          schema:
+            type: string
+            format: date-time
+          example: "2023-11-01T00:00:00.000Z"
+        - name: to
+          in: query
+          description: Aggregate metrics until this date (ISO 8601)
+          schema:
+            type: string
+            format: date-time
+          example: "2023-11-08T23:59:59.999Z"
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Metrics'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /health:
+    get:
+      summary: Health check
+      description: Check the health status of the service and its dependencies
+      tags:
+        - Health
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Health'
+        '503':
+          description: Service is unhealthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Health'
+
+  /metrics:
+    get:
+      summary: Prometheus metrics
+      description: Prometheus-compatible metrics endpoint
+      tags:
+        - Health
+      responses:
+        '200':
+          description: Metrics in Prometheus format
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: |
+                  # HELP reports_generated_total Total number of reports generated
+                  # TYPE reports_generated_total counter
+                  reports_generated_total{type="orders",status="generated"} 150
