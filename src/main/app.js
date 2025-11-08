@@ -11,7 +11,7 @@ const createReportsRouter = require('../features/reports/http/router')
 
 function createApp (container) {
   const app = express()
-
+  app.set('trust proxy', 1)
   // Security middleware
   app.use(helmet())
 
