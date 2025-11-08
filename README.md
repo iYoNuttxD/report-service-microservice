@@ -9,7 +9,7 @@ Microserviço de relatórios e indicadores consolidados, construído com Clean A
 - Autenticação: JWT/JWKS
 - Observabilidade: Logs estruturados + Métricas Prometheus
 - Documentação: Swagger UI em `/api-docs`
-
+- Imagem oficial no Docker Hub: [https://hub.docker.com/r/iyonuttxd/delivery-service](https://hub.docker.com/r/iyonuttxd/report-service)
 ---
 
 ## 📋 Sumário
