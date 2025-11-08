@@ -6,7 +6,10 @@ const getMetricsHandler = require('./handlers/getMetricsHandler')
 function createReportsRouter (container) {
   const router = express.Router()
 
-  const { queryReportsUseCase, queryMetricsUseCase, repository } = container
+  // Pega as instâncias corretamente do container
+  const queryReportsUseCase = container.get('queryReportsUseCase')
+  const queryMetricsUseCase = container.get('queryMetricsUseCase')
+  const repository = container.get('repository')
 
   // GET /api/v1/reports - List/query reports
   router.get('/', getReportsHandler(queryReportsUseCase))
