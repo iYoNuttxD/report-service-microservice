@@ -12,6 +12,11 @@ Microserviço de relatórios e indicadores consolidados, construído com Clean A
 - Imagem oficial no Docker Hub: [https://hub.docker.com/r/iyonuttxd/report-service](https://hub.docker.com/r/iyonuttxd/report-service)
 ---
 
+# Feito Por
+
+Daniel Ganz Musse, João Vitor de Souza Hernandes, Flavio Augusto da Cruz Melo, Matheus 
+Lowen, Enrico Malho Bozza 
+
 ## 📋 Sumário
 
 - [Visão Geral](#-visão-geral)
